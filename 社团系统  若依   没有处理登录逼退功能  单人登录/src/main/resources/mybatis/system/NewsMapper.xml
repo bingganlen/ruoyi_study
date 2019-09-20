@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.system.news.mapper.NewsMapper">
+    
+    <resultMap type="News" id="NewsResult">
+        <result property="newsId"       column="news_id"       />
+        <result property="deptId"    column="dept_id"    />
+        <result property="title"     column="title"     />
+        <result property="content"  column="content"  />
+        <result property="status"         column="status"          />
+        <result property="createBy"       column="create_by"       />
+        <result property="createTime"     column="create_time"     />
+        <result property="updateBy"       column="update_by"       />
+        <result property="updateTime"     column="update_time"     />
+        <result property="remark"         column="remark"          />
+        <association property="dept"    column="dept_id" javaType="Dept" resultMap="deptResult" />
+    </resultMap>
+
+    <resultMap id="deptResult" type="Dept">
+        <id     property="deptId"   column="dept_id"     />
+        <result property="parentId" column="parent_id"   />
+        <result property="deptName" column="dept_name"   />
+        <result property="orderNum" column="order_num"   />
+        <result property="status"   column="dept_status" />
+    </resultMap>
+
+    <sql id="selectNewsVo">
+      select n.news_id,n.dept_id,n.title,n.content,n.status,n.create_by,n.create_time,n.update_by,n.update_time,remark,
+      d.dept_id, d.parent_id, d.dept_name, d.order_num, d.status as dept_status
+      from sys_news n left join sys_dept d on n.dept_id = d.dept_id
+    </sql>
+    
+    <select id="selectNewsList" parameterType="News" resultMap="NewsResult">
+        <include refid="selectNewsVo"/>
+        <where>
+            <if test="newsId!=null "> and n.news_id = #{newsId}</if>
+            <if test="deptId !=null"> and n.dept_id = #{deptId}</if>
+            <if test="title != null and title!= ''"> and n.title like #{title}</if>
+            <if test="content!=null and content!=''">and n.content like #{content}</if>
+            <if test="status!=null and status != ''">and n.status = #{status}</if>
+            <if test="createBy!=null"> and n.create_by=#{createBy}</if>
+            <if test="createTime!=null">and n.create_time=#{createTime}</if>
+            <if test="updateBy!=null">and n.update_by=#{updateBy}</if>
+            <if test="updateTime!=null">and n.update_time=#{updateTime}</if>
+            <if test="remark!=null"> and n.remark=#{remark}</if>
+            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+                AND date_format(n.create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+                AND date_format(n.create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+            </if>
+            ${params.dataScope}
+        </where>
+    </select>
+    
+    <select id="selectByNewsId" parameterType="Long" resultMap="NewsResult">
+        <include refid="selectNewsVo"/>
+        where news_id = #{newsId}
+    </select>
+
+    <insert id="insertNews" parameterType="News" useGeneratedKeys="true" keyProperty="newsId">
+      insert into sys_news(
+        <if test="deptId !=null">  dept_id,</if>
+        <if test="title != null">  title,</if>
+        <if test="content!=null"> content ,</if>
+        <if test="status!=null"> status,</if>
+        <if test="createBy!=null">  create_by,</if>
+        <if test="updateBy!=null"> update_by,</if>
+        <if test="updateTime!=null"> update_time,</if>
+        <if test="remark!=null">  remark,</if>
+        create_time
+      )values(
+        <if test="deptId !=null">  #{deptId},</if>
+        <if test="title != null">  #{title},</if>
+        <if test="content!=null"> #{content} ,</if>
+        <if test="status!=null"> #{status},</if>
+        <if test="createBy!=null">  #{createBy},</if>
+        <if test="updateBy!=null"> #{updateBy},</if>
+        <if test="updateTime!=null"> #{updateTime},</if>
+        <if test="remark!=null">  #{remark},</if>
+        sysdate()
+        )
+    </insert>
+    
+    <update id="updateNews" parameterType="News">
+        update sys_news
+        <set>
+            <if test="deptId !=null">  dept_id = #{deptId},</if>
+            <if test="title != null">  title=#{title},</if>
+            <if test="content!=null"> content = #{content},</if>
+            <if test="status!=null"> status = #{status},</if>
+            <if test="createBy!=null">  create_by=#{createBy},</if>
+            <if test="createTime!=null"> create_time=#{createTime},</if>
+            <if test="updateBy!=null"> update_by=#{updateBy},</if>
+            <if test="updateTime!=null"> update_time=#{updateTime},</if>
+            <if test="remark!=null">  remark=#{remark},</if>
+            update_time=sysdate()
+        </set>
+        where news_id = #{newsId}
+    </update>
+
+    <delete id="deleteNewsByIds" parameterType="String">
+        delete from sys_news where news_id in
+        <foreach item="newsId" collection="array" open="(" separator="," close=")">
+            #{newsId}
+        </foreach>
+    </delete>
+
+</mapper>

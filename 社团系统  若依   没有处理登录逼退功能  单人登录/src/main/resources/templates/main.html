@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html  lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--360浏览器优先以webkit内核解析-->
+    <title>若依介绍</title>
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="../static/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link href="../static/css/main/animate.min.css" th:href="@{/css/main/animate.min.css}" rel="stylesheet"/>
+    <link href="../static/css/main/style.min862f.css" th:href="@{/css/main/style.min862f.css}" rel="stylesheet"/>
+</head>
+
+<body class="gray-bg">
+    <div class="row  border-bottom white-bg dashboard-header" id="showContent">
+        <div class="col-sm-12" >
+            <blockquote class="text-warning" style="font-size:14px">欢迎使用"五个一"工程社团社交管理系统
+            </blockquote>
+
+            <hr>
+        </div>
+
+    </div>
+
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+</body>
+<script>
+
+    +function () {
+
+        $.ajax({
+            url:'/system/notice/findAllNotice',
+            type:'post',
+            success:function (res) {
+                $(res).each(function () {
+                    let type;
+                    if(this.noticeType==1){
+                        type = '通知';
+                    }else{
+                        type = '公告';
+                    }
+
+                    $('#showContent').append(`<div style="margin-top:20px;" class="col-sm-4"><h3>${type}</h3><h4>${this.noticeTitle}</h4><br/>${this.noticeContent}</div>`);
+                });
+            }
+        })
+
+    }();
+
+</script>
+</html>

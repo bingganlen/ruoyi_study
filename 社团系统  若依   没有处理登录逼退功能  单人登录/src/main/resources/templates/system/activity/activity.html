@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+	xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<meta charset="utf-8">
+<head th:include="include :: header"></head>
+<link th:href="@{/ajax/libs/jquery-layout/jquery.layout-latest.css}" rel="stylesheet"/>
+<link th:href="@{/ajax/libs/jquery-ztree/3.5/css/metro/zTreeStyle.css}" rel="stylesheet"/>
+
+<body class="gray-bg">
+	<div class="container-div ui-layout-center">
+		<div class="row">
+
+	        <div class="btn-group hidden-xs" id="toolbar" role="group">
+	        	<a class="btn btn-outline btn-success btn-rounded" onclick="$.modal.open('添加活动', '/system/activity/add');" shiro:hasPermission="system:activity:add">
+	                <i class="fa fa-plus"></i> 新增
+	            </a>
+	        </div>
+	        
+	        <div class="col-sm-12 select-table table-striped">
+			    <table id="bootstrap-table" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+	<div th:include="include :: footer"></div>
+	<script th:src="@{/ajax/libs/jquery-layout/jquery.layout-latest.js}"></script>
+	<script th:src="@{/ajax/libs/jquery-ztree/3.5/js/jquery.ztree.all-3.5.js}"></script>
+	<script th:inline="javascript">
+		var prefix = ctx + "system/activity";
+
+        var deleteFlag = [[${@permission.hasPermi('system:activity:delete')}]];
+        var passFlag = [[${@permission.hasPermi('system:activity:pass')}]];
+
+		$(function() {
+			queryUserList();
+		});
+
+		var deleteActivity = function (activityId) {
+			$.ajax({
+				url:'/system/activity/delete',
+				data:{
+                    activityId:activityId
+				},
+				success:function (res) {
+                    $.modal.msgSuccess(res.msg);
+                    $('#bootstrap-table').bootstrapTable('refresh');
+                },
+				error:function (res) {
+					alert('权限不足');
+                }
+			})
+        };
+
+		var passActivity = function (activityId) {
+            $.ajax({
+                url:'/system/activity/pass',
+                data:{
+                    activityId:activityId,
+					status:1
+                },
+                success:function (res) {
+                    $.modal.msgSuccess(res.msg);
+                    $('#bootstrap-table').bootstrapTable('refresh');
+                },
+                error:function (res) {
+                    alert('权限不足');
+                }
+            })
+        };
+
+		var addJoin = function (activityId) {
+			$.ajax({
+				url:'/system/join/addJoin',
+				data:{
+					activityId:activityId
+				},
+				success:function (res) {
+					$.modal.msgSuccess(res.msg);
+					$('#bootstrap-table').bootstrapTable('refresh');
+				}, error:function (res) {
+					alert('权限不足');
+				}
+			})
+		};
+
+		function queryUserList() {
+		    var options = {
+		        url: prefix + "/list",
+                pagination: true, //是否显示分页（*）
+                pageSize: 20, //每页的记录行数（*）
+                sidePagination: "client",
+		        columns: [{
+		            checkbox: true
+		        },{
+		            field: 'activityId',
+		            title: '部门编号'
+		        },{
+		            field:'title', title:'活动名称'
+				},{
+		            field: 'dept.deptName',
+		            title: '举办社团',
+		        },
+		        {
+		            field: 'hostDeptment',
+		            title: '举办单位'
+		        },
+		        {
+		            field: 'manager',
+		            title: '主持人'
+		        },
+		        {
+		            field: 'place',
+		            title: '举办地点',
+		        },
+		        {
+		            field: 'money',
+		            title: '经费'
+		        },
+				{
+					field: 'score',
+					title: '学分'
+				},{
+		        	title:'截止日期',
+					field:'endTime'
+				},{
+					title:'参加人数',
+					field:'count'
+				}, {
+					field: 'status',
+					title: '状态',
+					align: 'center',
+					formatter:function (value, row, index) {
+						if (value==0||value==null){
+							return '审核中';
+						}else{
+							return '执行';
+						}
+					}
+		        },
+		        {
+		            title: '操作',
+		            align: 'center',
+                    formatter:function (value, row, index) {
+						var actions = [];
+						if (row.status==0||row.status==null){
+                            actions.push('<a class="btn  btn-primary '+passFlag+'" href="#" type="button" onclick="passActivity(\''+row.activityId+'\')"<i class="fa fa-edit"></i>通过</a>');
+						}
+						actions.push('<a class="btn  btn-danger '+deleteFlag+'" href="#" type="button" onclick="deleteActivity(\''+row.activityId+'\')"<i class="fa fa-edit"></i>删除</a>');
+						actions.push('<a class="btn  btn-success " href="#" type="button" onclick="addJoin(\''+row.activityId+'\')"<i class="fa fa-edit"></i>参加活动</a>');
+                        return actions.join('');
+                    }
+		        }]
+		    };
+		    $('#bootstrap-table').bootstrapTable(options);
+		}
+
+
+
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.system.activity.mapper.ActivityMapper">
+	
+	<resultMap id="ActivityResult" type="Activity">
+		<id property="activityId" column="activity_id"/>
+		<result property="deptId"       column="dept_id"      />
+		<result property="title" column="title"/>
+		<result property="place" column="place"/>
+		<result property="operateTime" column="operate_time"/>
+		<result property="manager" column="manager"/>
+		<result property="hostDeptment" column="host_deptment"/>
+		<result property="score" column="score"/>
+		<result property="status" column="status"/>
+		<result property="money" column="money"/>
+		<result property="createBy"     column="create_by"    />
+		<result property="createTime"   column="create_time"  />
+		<result property="updateBy"     column="update_by"    />
+		<result property="updateTime"   column="update_time"  />
+		<result property="endTime" column="end_time"/>
+		<result property="remark"       column="remark"       />
+		<association property="dept"    column="dept_id" javaType="Dept" resultMap="deptResult" />
+	</resultMap>
+
+	<resultMap id="deptResult" type="Dept">
+		<id     property="deptId"   column="dept_id"     />
+		<result property="parentId" column="parent_id"   />
+		<result property="deptName" column="dept_name"   />
+		<result property="orderNum" column="order_num"   />
+		<result property="status"   column="dept_status" />
+	</resultMap>
+
+	<sql id="selectVo">
+		select a.activity_id,a.dept_id,a.title,a.place,a.operate_time,end_time,
+		a.manager,a.host_deptment,a.score,a.money,a.status,a.create_by,
+		a.create_time,a.update_by,a.update_time,a.remark,
+		d.dept_id, d.parent_id, d.dept_name, d.order_num, d.status as dept_status
+		 from sys_activity a,sys_dept d where a.dept_id = d.dept_id and end_time>now()
+	</sql>
+	
+	<select id="selectByDeptId" resultMap="ActivityResult" parameterType="Long">
+		<include refid="selectVo"/>
+		<if test="deptId != null">
+			and d.dept_id = #{deptId}
+		</if>
+
+	</select>
+
+
+	
+	<insert id="insertActivity" parameterType="Activity" useGeneratedKeys="true" keyProperty="activityId">
+
+		insert into sys_activity(
+		<if test="activityId !=null and activityId != 0">activity_id,</if>
+		<if test="deptId !=null and deptId != 0">dept_id,</if>
+		<if test="title !=null and title != ''">title,</if>
+		<if test="place !=null and place != ''">place,</if>
+		<if test="operateTime !=null">operate_time,</if>
+		<if test="endTime!=null">end_time,</if>
+		<if test="manager !=null and manager != ''">manager,</if>
+		<if test="hostDeptment !=null and hostDeptment != ''">host_deptment,</if>
+		<if test="score !=null ">score,</if>
+		<if test="money !=null">money,</if>
+		<if test="createBy != null and createBy != ''">create_by,</if>
+		<if test="remark != null and remark != ''">remark,</if>
+		create_time
+		)values(
+		<if test="activityId !=null and activityId != 0">#{activityId},</if>
+		<if test="deptId !=null and deptId != 0">#{deptId},</if>
+		<if test="title !=null and title != ''">#{title},</if>
+		<if test="place !=null and place != ''">#{place},</if>
+		<if test="operateTime !=null">#{operateTime},</if>
+		<if test="endTime!=null">#{endTime},</if>
+		<if test="manager !=null and manager != ''">#{manager},</if>
+		<if test="hostDeptment !=null and hostDeptment != ''">#{hostDeptment},</if>
+		<if test="score !=null ">#{score},</if>
+		<if test="money !=null">#{money},</if>
+		<if test="createBy != null and createBy != ''">#{createBy},</if>
+		<if test="remark != null and remark != ''">#{remark},</if>
+		sysdate()
+		)
+	</insert>
+	
+	<delete id="deleteActivity" parameterType="java.lang.Long">
+		delete from sys_activity where activity_id = #{activityId}
+	</delete>
+	
+	<update id="updateActivity" parameterType="Activity">
+		update sys_activity
+		<set>
+			<if test="status !=null ">status = #{status},</if>
+			<if test="deptId !=null and deptId != 0">dept_id = #{deptId},</if>
+			<if test="title !=null and title != ''">title = #{title},</if>
+			<if test="place !=null and place != ''">place = #{place},</if>
+			<if test="operateTime !=null">operate_time = #{operateTime},</if>
+			<if test="manager !=null and manager != ''">manager = #{manager},</if>
+			<if test="hostDeptment !=null and hostDeptment != ''">host_deptment = #{hostDeptment},</if>
+			<if test="score !=null ">score = #{score},</if>
+			<if test="money !=null">money = #{money},</if>
+			<if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+			<if test="remark != null and remark != ''">#{remark},</if>
+			update_time = sysdate()
+		</set>
+		  where activity_id = #{activityId}
+	</update>
+</mapper> 
